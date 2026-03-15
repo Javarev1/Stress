@@ -23,7 +23,6 @@ import java.util.List;
 
 public final class Stress extends JavaPlugin {
 
-    // Singleton
     private static Stress instance;
 
     // Active tests
@@ -32,7 +31,6 @@ public final class Stress extends JavaPlugin {
     // Test registry
     private final TestRegistry registry = new TestRegistry();
 
-    // Enable
     @Override
     public void onEnable() {
         instance = this;
@@ -53,7 +51,6 @@ public final class Stress extends JavaPlugin {
         getLogger().info("Stress enabled.");
     }
 
-    // Disable
     @Override
     public void onDisable() {
         stopAll();
@@ -67,19 +64,16 @@ public final class Stress extends JavaPlugin {
         test.start();
     }
 
-    // Stop all
     public void stopAll() {
         tests.forEach(Test::stop);
         tests.clear();
     }
 
-    // Config check
     private boolean isTestEnabled(Test test) {
         return getConfig().getBoolean("enabled", true)
             && getConfig().getBoolean("tests." + test.getName(), true);
     }
 
-    // Accessor
     public static Stress get() { return instance; }
 
     // Registry accessor
