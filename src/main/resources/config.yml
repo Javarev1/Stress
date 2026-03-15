@@ -1,0 +1,12 @@
+# Stress Config
+
+# Global toggle
+enabled: true
+
+# Test toggles
+tests:
+  entity-spam: true
+  chunk-load: true
+  explosion: true
+  redstone: true
+  block-fill: true
