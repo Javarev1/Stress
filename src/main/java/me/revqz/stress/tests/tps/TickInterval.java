@@ -5,22 +5,21 @@ public class TickInterval {
     private final long start;
     private long end;
 
-    // Init start time
     public TickInterval() {
         this.start = System.nanoTime();
     }
 
-    // Record end time
+    // record end time
     public void end() {
         this.end = System.nanoTime();
     }
 
-    // Nanoseconds elapsed
+    // nanoseconds elapsed
     public long durationNs() {
         return end - start;
     }
 
-    // Milliseconds elapsed
+    // milliseconds elapsed
     public double durationMs() {
         return durationNs() / 1_000_000.0;
     }

@@ -13,7 +13,7 @@ import me.revqz.stress.tests.tps.TickInterval;
 
 public class TicksTest implements Test {
 
-    // Math ops per tick
+    // math ops per tick
     private static final int LOAD = 5_000_000;
 
     private BukkitTask task;
@@ -34,26 +34,31 @@ public class TicksTest implements Test {
             for (int i = 0; i < LOAD; i++) {
                 dump += Math.sin(Math.cos(i)) * Math.tan(i);
             }
-            if (dump == 0.1) System.out.println("prevent-opt");
+            if (dump == 0.1)
+                System.out.println("prevent-opt");
             interval.end();
 
             // Report 1 in 20 ticks
             if (Math.random() < 0.05) {
                 Bukkit.broadcast(Component.text(String.format(
-                    "[TicksTest] Internal: %.2fms | Sched TPS Drop: %.2fms | Paper Event: %.2fms",
-                    interval.durationMs(), schedProf.getMspt(), eventProf.getMspt()
-                ), NamedTextColor.YELLOW));
+                        "[TicksTest] Internal: %.2fms | Sched TPS Drop: %.2fms | Paper Event: %.2fms",
+                        interval.durationMs(), schedProf.getMspt(), eventProf.getMspt()), NamedTextColor.YELLOW));
             }
         }, 0L, 1L);
     }
 
     @Override
     public void stop() {
-        if (task != null) task.cancel();
-        if (schedProf != null) schedProf.stop();
-        if (eventProf != null) eventProf.stop();
+        if (task != null)
+            task.cancel();
+        if (schedProf != null)
+            schedProf.stop();
+        if (eventProf != null)
+            eventProf.stop();
     }
 
     @Override
-    public String getName() { return "ticks"; }
+    public String getName() {
+        return "ticks";
+    }
 }

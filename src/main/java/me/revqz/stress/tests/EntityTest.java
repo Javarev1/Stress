@@ -11,7 +11,7 @@ import me.revqz.stress.test.Test;
 
 public class EntityTest implements Test {
 
-    // Entities per tick
+    // entities per tick of running
     private static final int BATCH = 10;
 
     private BukkitTask task;
@@ -31,14 +31,20 @@ public class EntityTest implements Test {
 
     @Override
     public void stop() {
-        if (task != null) task.cancel();
+        if (task != null)
+            task.cancel();
         // Remove spawned entities
         if (spawnLoc != null) {
             spawnLoc.getWorld().getNearbyEntities(spawnLoc, 64, 64, 64)
-                .forEach(e -> { if (e.getType() == EntityType.ZOMBIE) e.remove(); });
+                    .forEach(e -> {
+                        if (e.getType() == EntityType.ZOMBIE)
+                            e.remove();
+                    });
         }
     }
 
     @Override
-    public String getName() { return "entity"; }
+    public String getName() {
+        return "entity";
+    }
 }

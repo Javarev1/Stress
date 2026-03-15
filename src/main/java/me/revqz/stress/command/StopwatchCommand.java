@@ -1,16 +1,11 @@
 package me.revqz.stress.command;
 
-// Bukkit
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-
-// Adventure
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-
-// Internal
 import me.revqz.stress.Stress;
 import me.revqz.stress.utils.Stopwatch;
 
@@ -23,7 +18,7 @@ public class StopwatchCommand implements CommandExecutor {
             return true;
         }
 
-        // Validate arg
+        // validation of argument
         if (args.length != 1) {
             player.sendMessage(Component.text("Usage: /stopwatch <seconds>", NamedTextColor.RED));
             return true;
@@ -32,7 +27,8 @@ public class StopwatchCommand implements CommandExecutor {
         int seconds;
         try {
             seconds = Integer.parseInt(args[0]);
-            if (seconds <= 0) throw new NumberFormatException();
+            if (seconds <= 0)
+                throw new NumberFormatException();
         } catch (NumberFormatException e) {
             player.sendMessage(Component.text("Positive integer only.", NamedTextColor.RED));
             return true;

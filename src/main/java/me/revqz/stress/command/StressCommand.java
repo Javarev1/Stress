@@ -26,7 +26,7 @@ public class StressCommand implements CommandExecutor, TabCompleter {
 
         if (args.length != 1) {
             player.sendMessage(Component.text(
-                "Usage: /stress <test_name>", NamedTextColor.RED));
+                    "Usage: /stress <test_name>", NamedTextColor.RED));
             return true;
         }
 
@@ -35,15 +35,15 @@ public class StressCommand implements CommandExecutor, TabCompleter {
 
         if (test == null) {
             player.sendMessage(Component.text(
-                "Unknown test: " + name, NamedTextColor.RED));
+                    "Invalid test: " + name, NamedTextColor.RED));
             player.sendMessage(Component.text(
-                "Available: " + Stress.get().getRegistry().names(), NamedTextColor.GRAY));
+                    "Valid test: " + Stress.get().getRegistry().names(), NamedTextColor.GRAY));
             return true;
         }
 
         Stress.get().register(test);
         player.sendMessage(Component.text(
-            "Started: " + name, NamedTextColor.GREEN));
+                "Started: " + name, NamedTextColor.GREEN));
         return true;
     }
 
@@ -53,7 +53,8 @@ public class StressCommand implements CommandExecutor, TabCompleter {
             String prefix = args[0].toLowerCase();
             List<String> matches = new ArrayList<>();
             for (String name : Stress.get().getRegistry().names()) {
-                if (name.startsWith(prefix)) matches.add(name);
+                if (name.startsWith(prefix))
+                    matches.add(name);
             }
             return matches;
         }

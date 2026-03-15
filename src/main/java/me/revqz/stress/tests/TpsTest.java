@@ -18,7 +18,7 @@ import me.revqz.stress.tests.tps.TickInterval;
 
 public class TpsTest implements Test {
 
-    // Volume radius
+    // volume radius of test
     private static final int RADIUS = 15;
     private static final Random RNG = new Random();
 
@@ -40,7 +40,7 @@ public class TpsTest implements Test {
         task = Bukkit.getScheduler().runTaskTimer(Stress.get(), () -> {
             TickInterval interval = new TickInterval();
             Material mat = RNG.nextBoolean() ? Material.REDSTONE_BLOCK : Material.AIR;
-            
+
             // Massive synchronous block updates
             for (int x = -RADIUS; x <= RADIUS; x++) {
                 for (int y = -RADIUS; y <= RADIUS; y++) {
@@ -52,17 +52,19 @@ public class TpsTest implements Test {
             interval.end();
 
             Bukkit.broadcast(Component.text(String.format(
-                "[TpsTest] Block Update Time: %.2fms | Sched Delay: %.2fms | Paper Event: %.2fms",
-                interval.durationMs(), schedProf.getMspt(), eventProf.getMspt()
-            ), NamedTextColor.RED));
+                    "[TpsTest] Block Update Time: %.2fms | Sched Delay: %.2fms | Paper Event: %.2fms",
+                    interval.durationMs(), schedProf.getMspt(), eventProf.getMspt()), NamedTextColor.RED));
         }, 0L, 10L);
     }
 
     @Override
     public void stop() {
-        if (task != null) task.cancel();
-        if (schedProf != null) schedProf.stop();
-        if (eventProf != null) eventProf.stop();
+        if (task != null)
+            task.cancel();
+        if (schedProf != null)
+            schedProf.stop();
+        if (eventProf != null)
+            eventProf.stop();
         // Cleanup volume
         if (center != null) {
             for (int x = -RADIUS; x <= RADIUS; x++) {
@@ -76,5 +78,7 @@ public class TpsTest implements Test {
     }
 
     @Override
-    public String getName() { return "tps"; }
+    public String getName() {
+        return "tps";
+    }
 }

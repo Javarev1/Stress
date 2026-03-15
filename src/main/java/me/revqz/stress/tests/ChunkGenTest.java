@@ -23,23 +23,27 @@ public class ChunkGenTest implements Test {
         running.set(true);
         World world = Bukkit.getWorlds().get(0);
 
-        // Generate every tick async
+        // generate every tick async
         task = Bukkit.getScheduler().runTaskTimerAsynchronously(Stress.get(), () -> {
-            if (!running.get()) return;
+            if (!running.get())
+                return;
             int cx = RNG.nextInt(-RADIUS, RADIUS);
             int cz = RNG.nextInt(-RADIUS, RADIUS);
-            // Force-generate, skip if loaded
-            world.getChunkAtAsync(cx, cz, true).thenAccept(chunk ->
-                Bukkit.getScheduler().runTask(Stress.get(), (Runnable) chunk::unload));
+            // force-generate
+            world.getChunkAtAsync(cx, cz, true).thenAccept(chunk -> // skipts if loaded
+            Bukkit.getScheduler().runTask(Stress.get(), (Runnable) chunk::unload)); // unload after generation
         }, 0L, 1L);
     }
 
     @Override
     public void stop() {
         running.set(false);
-        if (task != null) task.cancel();
+        if (task != null)
+            task.cancel();
     }
 
     @Override
-    public String getName() { return "chunk-gen"; }
+    public String getName() {
+        return "chunk-gen";
+    }
 }

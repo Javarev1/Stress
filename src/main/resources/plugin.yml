@@ -2,15 +2,15 @@ name: Stress
 version: '1.0'
 main: me.revqz.stress.Stress
 api-version: '1.21'
-author: revqz
+author: revqz 
 
 commands:
   stopwatch:
-    description: Countdown timer.
+    description: Countdown timer (Stopwatch).
     usage: /stopwatch <seconds>
   benchmark:
-    description: Run metric benchmark.
+    description: Run a benchmark (Benchmark)
     usage: /benchmark <seconds>
   stress:
-    description: Run a named stress test.
+    description: Run a stress test.
     usage: /stress <test_name>

@@ -11,7 +11,6 @@ public class BukkitSchedulerTickProfiler {
     private long lastTick;
     private double lastMspt;
 
-    // Start tracker
     public void start() {
         lastTick = System.nanoTime();
         task = Bukkit.getScheduler().runTaskTimer(Stress.get(), () -> {
@@ -21,12 +20,12 @@ public class BukkitSchedulerTickProfiler {
         }, 0L, 1L);
     }
 
-    // Stop tracker
     public void stop() {
-        if (task != null) task.cancel();
+        if (task != null)
+            task.cancel();
     }
 
-    // Latest MSPT
+    // latest mspt
     public double getMspt() {
         return lastMspt;
     }

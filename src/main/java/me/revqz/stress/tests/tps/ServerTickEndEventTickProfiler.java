@@ -13,23 +13,21 @@ public class ServerTickEndEventTickProfiler implements Listener {
 
     private double lastMspt;
 
-    // Start listening
     public void start() {
         Bukkit.getPluginManager().registerEvents(this, Stress.get());
     }
 
-    // Stop listening
     public void stop() {
         HandlerList.unregisterAll(this);
     }
 
-    // Record exact duration
+    // record exact duration
     @EventHandler
     public void onTickEnd(ServerTickEndEvent event) {
         lastMspt = event.getTickDuration();
     }
 
-    // Latest MSPT
+    // latest mspt
     public double getMspt() {
         return lastMspt;
     }

@@ -9,7 +9,7 @@ import me.revqz.stress.test.Test;
 
 public class TestArgument implements Test {
 
-    // Parses per tick
+    // parses per tick
     private static final int RATE = 100_000;
 
     private BukkitTask task;
@@ -18,7 +18,7 @@ public class TestArgument implements Test {
     public void start() {
         task = Bukkit.getScheduler().runTaskTimer(Stress.get(), () -> {
             for (int i = 0; i < RATE; i++) {
-                // Baseline string parsing
+                // base string parsing
                 Integer.parseInt("12345");
                 Boolean.parseBoolean("true");
                 UUID.fromString("00000000-0000-0000-0000-000000000000");
@@ -28,9 +28,12 @@ public class TestArgument implements Test {
 
     @Override
     public void stop() {
-        if (task != null) task.cancel();
+        if (task != null)
+            task.cancel();
     }
 
     @Override
-    public String getName() { return "argument"; }
+    public String getName() {
+        return "argument";
+    }
 }

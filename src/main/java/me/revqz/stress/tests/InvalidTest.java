@@ -22,20 +22,22 @@ public class InvalidTest implements Test {
     @Override
     public void start() {
         task = Bukkit.getScheduler().runTaskTimer(Stress.get(), () -> {
-            // Find random online player
+            // random online player (track)
             Collection<? extends Player> players = Bukkit.getOnlinePlayers();
-            if (players.isEmpty()) return;
+            if (players.isEmpty())
+                return;
             Player target = players.stream()
-                .skip(RNG.nextInt(players.size()))
-                .findFirst()
-                .orElse(null);
+                    .skip(RNG.nextInt(players.size()))
+                    .findFirst()
+                    .orElse(null);
 
             if (target != null) {
                 Object channel = getChannel(target);
                 if (channel != null) {
                     try {
                         Method isActive = channel.getClass().getMethod("isActive");
-                        if (!(Boolean) isActive.invoke(channel)) return;
+                        if (!(Boolean) isActive.invoke(channel))
+                            return;
 
                         Method pipelineMethod = channel.getClass().getMethod("pipeline");
                         Object pipeline = pipelineMethod.invoke(channel);
@@ -50,7 +52,8 @@ public class InvalidTest implements Test {
                             Object badBuf = wrappedBuffer.invoke(null, garbage);
                             fireChannelRead.invoke(pipeline, badBuf);
                         }
-                    } catch (Exception ignored) {}
+                    } catch (Exception ignored) {
+                    }
                 }
             }
         }, 0L, 1L);
@@ -58,26 +61,34 @@ public class InvalidTest implements Test {
 
     @Override
     public void stop() {
-        if (task != null) task.cancel();
+        if (task != null)
+            task.cancel();
     }
 
     @Override
-    public String getName() { return "invalid"; }
+    public String getName() {
+        return "invalid";
+    }
 
-    // Minimal reflection to find the Netty channel
+    // reflection to find the Netty channel
     private Object getChannel(Player player) {
         try {
             Object handle = player.getClass().getMethod("getHandle").invoke(player);
-            Object connection = getField(handle, "c"); // connection (1.20+)
-            if (connection == null) connection = getField(handle, "playerConnection");
-            if (connection == null) return null;
+            Object connection = getField(handle, "c"); // connection
+            if (connection == null)
+                connection = getField(handle, "playerConnection");
+            if (connection == null)
+                return null;
 
-            Object networkManager = getField(connection, "c"); // networkManager (1.20+)
-            if (networkManager == null) networkManager = getField(connection, "networkManager");
-            if (networkManager == null) return null;
+            Object networkManager = getField(connection, "c"); // networkManager
+            if (networkManager == null)
+                networkManager = getField(connection, "networkManager");
+            if (networkManager == null)
+                return null;
 
-            Object channel = getField(networkManager, "m"); // channel (1.20+)
-            if (channel == null) channel = getField(networkManager, "channel");
+            Object channel = getField(networkManager, "m"); // channel
+            if (channel == null)
+                channel = getField(networkManager, "channel");
 
             return isChannel(channel) ? channel : null;
         } catch (Exception ignored) {
@@ -95,31 +106,38 @@ public class InvalidTest implements Test {
         }
     }
 
-    // Generic search for Channel field
+    // generic search for Channel field
     private Object fallbackChannelFind(Object current) {
         try {
             Object handle = current.getClass().getMethod("getHandle").invoke(current);
             for (Field f1 : handle.getClass().getFields()) {
                 Object pConn = get(f1, handle);
-                if (pConn == null) continue;
+                if (pConn == null)
+                    continue;
                 for (Field f2 : pConn.getClass().getFields()) {
                     Object nManager = get(f2, pConn);
-                    if (nManager == null) continue;
+                    if (nManager == null)
+                        continue;
                     for (Field f3 : nManager.getClass().getFields()) {
                         Object ch = get(f3, nManager);
-                        if (isChannel(ch)) return ch;
+                        if (isChannel(ch))
+                            return ch;
                     }
                 }
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         return null;
     }
 
     private boolean isChannel(Object obj) {
-        if (obj == null) return false;
+        if (obj == null)
+            return false;
         try {
             return Class.forName("io.netty.channel.Channel").isInstance(obj);
-        } catch (Exception e) { return false; }
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     private Object get(Field f, Object obj) {

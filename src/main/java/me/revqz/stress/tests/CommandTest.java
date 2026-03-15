@@ -9,7 +9,7 @@ import me.revqz.stress.test.Test;
 
 public class CommandTest implements Test {
 
-    // Dispatches per tick
+    // dispatches per tick
     private static final int RATE = 1000;
 
     private BukkitTask task;
@@ -27,9 +27,12 @@ public class CommandTest implements Test {
 
     @Override
     public void stop() {
-        if (task != null) task.cancel();
+        if (task != null)
+            task.cancel();
     }
 
     @Override
-    public String getName() { return "command"; }
+    public String getName() {
+        return "command";
+    }
 }
