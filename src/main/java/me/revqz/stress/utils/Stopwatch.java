@@ -35,7 +35,10 @@ public final class Stopwatch {
                     if (onFinish != null) onFinish.run();
                     return;
                 }
-                player.sendActionBar(Component.text(format(tenths[0]), NamedTextColor.YELLOW));
+                Component msg = Component.text("sᴛᴏᴘᴡᴀᴛᴄʜ ", net.kyori.adventure.text.format.TextColor.color(0x4A90E2))
+                    .append(Component.text("| ", NamedTextColor.WHITE))
+                    .append(Component.text(format(tenths[0]), NamedTextColor.GRAY));
+                player.sendActionBar(msg);
                 tenths[0]--;
             }
         }.runTaskTimer(Stress.get(), 0L, 2L);
