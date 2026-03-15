@@ -14,6 +14,7 @@ import me.revqz.stress.tests.ChunkLoadTest;
 import me.revqz.stress.tests.CommandTest;
 import me.revqz.stress.tests.EntityTest;
 import me.revqz.stress.tests.InvalidTest;
+import me.revqz.stress.tests.NBTDataTest;
 import me.revqz.stress.tests.PacketSpamTest;
 import me.revqz.stress.tests.TestArgument;
 import me.revqz.stress.tests.TicksTest;
@@ -26,25 +27,27 @@ public final class Stress extends JavaPlugin {
 
     private static Stress instance;
 
-    // Active tests
+    // active tests
     private final List<Test> tests = new ArrayList<>();
 
-    // Test registry
+    // test registry
     private final TestRegistry registry = new TestRegistry();
 
     @Override
     public void onEnable() {
         instance = this;
         saveDefaultConfig();
-        registry.register("chunk-gen",  ChunkGenTest::new);
+        registry.register("chunk-gen", ChunkGenTest::new);
         registry.register("chunk-load", ChunkLoadTest::new);
-        registry.register("entity",     EntityTest::new);
-        registry.register("command",    CommandTest::new);
-        registry.register("invalid",      InvalidTest::new);
+        registry.register("entity", EntityTest::new);
+        registry.register("command", CommandTest::new);
+        registry.register("invalid", InvalidTest::new);
+        registry.register("nbt-data", NBTDataTest::new);
         registry.register("packet-spam", PacketSpamTest::new);
-        registry.register("argument",    TestArgument::new);
-        registry.register("ticks",       TicksTest::new);
-        registry.register("tps",         TpsTest::new);
+        registry.register("argument", TestArgument::new);
+        registry.register("ticks", TicksTest::new);
+        registry.register("tps", TpsTest::new);
+
         getCommand("stopwatch").setExecutor(new StopwatchCommand());
         getCommand("benchmark").setExecutor(new BenchmarkCommand());
         StressCommand stressCmd = new StressCommand();
@@ -61,7 +64,8 @@ public final class Stress extends JavaPlugin {
 
     // Register test
     public void register(Test test) {
-        if (!isTestEnabled(test)) return;
+        if (!isTestEnabled(test))
+            return;
         tests.add(test);
         test.start();
     }
@@ -73,11 +77,15 @@ public final class Stress extends JavaPlugin {
 
     private boolean isTestEnabled(Test test) {
         return getConfig().getBoolean("enabled", true)
-            && getConfig().getBoolean("tests." + test.getName(), true);
+                && getConfig().getBoolean("tests." + test.getName(), true);
     }
 
-    public static Stress get() { return instance; }
+    public static Stress get() {
+        return instance;
+    }
 
     // Registry accessor
-    public TestRegistry getRegistry() { return registry; }
+    public TestRegistry getRegistry() {
+        return registry;
+    }
 }
