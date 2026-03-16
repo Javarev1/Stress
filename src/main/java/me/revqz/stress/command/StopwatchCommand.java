@@ -4,10 +4,9 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import me.revqz.stress.Stress;
 import me.revqz.stress.utils.Stopwatch;
+import me.revqz.stress.utils.MessageUtils;
 
 public class StopwatchCommand implements CommandExecutor {
 
@@ -20,7 +19,7 @@ public class StopwatchCommand implements CommandExecutor {
 
         // validation of argument
         if (args.length != 1) {
-            player.sendMessage(Component.text("Usage: /stopwatch <seconds>", NamedTextColor.RED));
+            player.sendMessage(MessageUtils.error("Usage: /stopwatch <seconds>"));
             return true;
         }
 
@@ -30,13 +29,13 @@ public class StopwatchCommand implements CommandExecutor {
             if (seconds <= 0)
                 throw new NumberFormatException();
         } catch (NumberFormatException e) {
-            player.sendMessage(Component.text("Positive integer only.", NamedTextColor.RED));
+            player.sendMessage(MessageUtils.error("Positive integer only."));
             return true;
         }
 
         // Delegate to util
         Stopwatch.start(player, seconds, Stress.get()::stopAll);
-        player.sendMessage(Component.text("Stopwatch: " + Stopwatch.format(seconds * 10), NamedTextColor.GREEN));
+        player.sendMessage(MessageUtils.success("Stopwatch: " + Stopwatch.format(seconds * 10)));
         return true;
     }
 }

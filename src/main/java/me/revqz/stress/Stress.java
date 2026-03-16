@@ -1,9 +1,7 @@
 package me.revqz.stress;
 
-// Bukkit
 import org.bukkit.plugin.java.JavaPlugin;
 
-// Internal
 import me.revqz.stress.command.BenchmarkCommand;
 import me.revqz.stress.command.StopwatchCommand;
 import me.revqz.stress.command.StressCommand;
@@ -62,17 +60,36 @@ public final class Stress extends JavaPlugin {
         getLogger().info("Stress disabled.");
     }
 
-    // Register test
-    public void register(Test test) {
+    // register test
+    public void register(Test test, int timeoutSeconds) {
         if (!isTestEnabled(test))
             return;
+            
+        test.setup();
         tests.add(test);
         test.start();
+        
+        if (timeoutSeconds > 0) {
+            org.bukkit.Bukkit.getScheduler().runTaskLater(this, () -> {
+                if (tests.contains(test)) {
+                    stopTest(test);
+                    getServer().broadcast(me.revqz.stress.utils.MessageUtils.info("Test stopped (Timeout reached): " + test.getName()));
+                }
+            }, timeoutSeconds * 20L);
+        }
+    }
+
+    public void stopTest(Test test) {
+        if (tests.remove(test)) {
+            test.stop();
+            test.cleanup();
+        }
     }
 
     public void stopAll() {
-        tests.forEach(Test::stop);
-        tests.clear();
+        for (Test test : new ArrayList<>(tests)) {
+            stopTest(test);
+        }
     }
 
     private boolean isTestEnabled(Test test) {
@@ -84,7 +101,7 @@ public final class Stress extends JavaPlugin {
         return instance;
     }
 
-    // Registry accessor
+    // registry accessor
     public TestRegistry getRegistry() {
         return registry;
     }

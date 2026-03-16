@@ -5,9 +5,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 
 import me.revqz.stress.Stress;
+import me.revqz.stress.utils.MessageUtils;
 
 public final class Stopwatch {
 
@@ -23,7 +23,7 @@ public final class Stopwatch {
             @Override
             public void run() {
                 if (tenths[0] <= 0) {
-                    player.sendActionBar(Component.text("Done!", NamedTextColor.GREEN));
+                    player.sendActionBar(net.kyori.adventure.text.Component.text("Done!", MessageUtils.ACCENT));
                     player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1f, 1f); // 1 decimal plac
                     active = null;
                     cancel();
@@ -31,9 +31,9 @@ public final class Stopwatch {
                         onFinish.run();
                     return;
                 }
-                Component msg = Component.text("sᴛᴏᴘᴡᴀᴛᴄʜ ", net.kyori.adventure.text.format.TextColor.color(0x4A90E2))
-                        .append(Component.text("| ", NamedTextColor.WHITE))
-                        .append(Component.text(format(tenths[0]), NamedTextColor.GRAY));
+                Component msg = Component.text("sᴛᴏᴘᴡᴀᴛᴄʜ ", MessageUtils.ACCENT)
+                        .append(Component.text("| ", MessageUtils.DARK))
+                        .append(Component.text(format(tenths[0]), MessageUtils.TEXT));
                 player.sendActionBar(msg);
                 tenths[0]--;
             }

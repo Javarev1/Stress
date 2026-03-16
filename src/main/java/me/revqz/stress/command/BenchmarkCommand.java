@@ -38,7 +38,7 @@ public class BenchmarkCommand implements CommandExecutor {
         }
 
         if (args.length != 1) {
-            player.sendMessage(Component.text("try: /benchmark <seconds>", NamedTextColor.RED));
+            player.sendMessage(me.revqz.stress.utils.MessageUtils.error("try: /benchmark <seconds>"));
             return true;
         }
 
@@ -48,7 +48,7 @@ public class BenchmarkCommand implements CommandExecutor {
             if (seconds <= 0)
                 throw new NumberFormatException();
         } catch (NumberFormatException e) {
-            player.sendMessage(Component.text("pos int only.", NamedTextColor.RED));
+            player.sendMessage(me.revqz.stress.utils.MessageUtils.error("pos int only."));
             return true;
         }
 
@@ -78,8 +78,8 @@ public class BenchmarkCommand implements CommandExecutor {
             printReport(player, seconds, ticks, pings);
         });
 
-        player.sendMessage(Component.text(
-                "Benchmark started for " + Stopwatch.format(seconds * 10), NamedTextColor.GREEN));
+        player.sendMessage(me.revqz.stress.utils.MessageUtils.success(
+                "Benchmark started for " + Stopwatch.format(seconds * 10)));
         return true;
     }
 
