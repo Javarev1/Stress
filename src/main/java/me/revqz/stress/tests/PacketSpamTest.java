@@ -1,33 +1,50 @@
 package me.revqz.stress.tests;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
+
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolManager;
+import com.comphenix.protocol.events.PacketContainer;
 
 import me.revqz.stress.Stress;
 import me.revqz.stress.test.Test;
 
 public class PacketSpamTest implements Test {
 
-    // 2 000 packets ish per second at 20 TPS
-    private static final int PACKETS_PER_TICK = 100;
-
     private static final Random RNG = new Random();
+
+    private int packetsPerTick;
     private BukkitTask task;
     private final AtomicLong totalSent = new AtomicLong(0);
     private long startMs;
+    private ProtocolManager protocol;
+
+    @Override
+    public void setup() {
+        packetsPerTick = Stress.get().getConfig().getInt("tests.packet-spam.packets-per-tick", 100);
+        Plugin pl = Bukkit.getPluginManager().getPlugin("ProtocolLib");
+        if (pl != null && pl.isEnabled()) {
+            protocol = ProtocolLibrary.getProtocolManager();
+        }
+    }
 
     @Override
     public void start() {
         startMs = System.currentTimeMillis();
         totalSent.set(0);
+
+        if (protocol == null) {
+            Stress.get().getLogger().warning("[PacketSpam] ProtocolLib not found — test skipped.");
+            return;
+        }
 
         task = Bukkit.getScheduler().runTaskTimer(Stress.get(), () -> {
             Collection<? extends Player> players = Bukkit.getOnlinePlayers();
@@ -41,33 +58,16 @@ public class PacketSpamTest implements Test {
             if (target == null)
                 return;
 
-            Object channel = getChannel(target);
-            if (channel == null)
-                return;
-
-            try {
-                Method isActive = channel.getClass().getMethod("isActive");
-                if (!(Boolean) isActive.invoke(channel))
-                    return;
-
-                Method pipelineMethod = channel.getClass().getMethod("pipeline");
-                Object pipeline = pipelineMethod.invoke(channel);
-                Method fireRead = pipeline.getClass()
-                        .getMethod("fireChannelRead", Object.class);
-
-                for (int i = 0; i < PACKETS_PER_TICK; i++) {
-                    Object pkt = (i % 2 == 0)
-                            ? buildBlockPlacePacket()
-                            : buildWindowClickPacket();
-
-                    if (pkt != null) {
-                        fireRead.invoke(pipeline, pkt);
-                        totalSent.incrementAndGet();
-                    }
+            for (int i = 0; i < packetsPerTick; i++) {
+                PacketContainer pkt = (i % 2 == 0)
+                        ? buildBlockChangePacket()
+                        : buildWindowItemsPacket();
+                try {
+                    protocol.sendServerPacket(target, pkt);
+                    totalSent.incrementAndGet();
+                } catch (Exception ignored) {
                 }
-            } catch (Exception ignored) {
             }
-
         }, 0L, 1L);
 
         Bukkit.getScheduler().runTaskTimerAsynchronously(Stress.get(), () -> {
@@ -97,164 +97,13 @@ public class PacketSpamTest implements Test {
         return "packet-spam";
     }
 
-    private Object buildBlockPlacePacket() {
-        try {
-            Class<?> blockPosClass = nms("core.BlockPos");
-            Class<?> dirClass = nms("core.Direction");
-            Class<?> vec3Class = nms("world.phys.Vec3");
-            Class<?> hitResultClass = nms("world.phys.BlockHitResult");
-
-            Object blockPos = blockPosClass
-                    .getConstructor(int.class, int.class, int.class)
-                    .newInstance(0, 64, 0);
-
-            Object dirUp = dirClass.getEnumConstants()[1];
-
-            Object hitVec = vec3Class
-                    .getConstructor(double.class, double.class, double.class)
-                    .newInstance(0.5, 65.0, 0.5);
-
-            Object blockHit = hitResultClass
-                    .getConstructor(vec3Class, dirClass, blockPosClass, boolean.class)
-                    .newInstance(hitVec, dirUp, blockPos, false);
-
-            Class<?> handClass = nms("world.InteractionHand");
-            Object mainHand = handClass.getEnumConstants()[0];
-
-            Class<?> pktClass = nms("network.protocol.game.ServerboundUseItemOnPacket");
-            try {
-                Constructor<?> ctor = pktClass.getConstructor(handClass, hitResultClass, int.class);
-                return ctor.newInstance(mainHand, blockHit, 0);
-            } catch (NoSuchMethodException e) {
-                Constructor<?> ctor = pktClass.getConstructor(handClass, hitResultClass);
-                return ctor.newInstance(mainHand, blockHit);
-            }
-        } catch (Exception e) {
-            return null;
-        }
+    private PacketContainer buildBlockChangePacket() {
+        PacketContainer pkt = protocol.createPacket(PacketType.Play.Server.BLOCK_CHANGE);
+        return pkt;
     }
 
-    private Object buildWindowClickPacket() {
-        try {
-            Class<?> pktClass = nms("network.protocol.game.ServerboundContainerClickPacket");
-            Class<?> clickClass = nms("world.inventory.ClickType");
-            Class<?> itemClass = nms("world.item.ItemStack");
-            Object clickType = clickClass.getEnumConstants()[0];
-
-            Object emptyItem;
-            try {
-                emptyItem = itemClass.getField("EMPTY").get(null);
-            } catch (NoSuchFieldException ex) {
-                emptyItem = itemClass.getMethod("empty").invoke(null);
-            }
-
-            Class<?> mapClass = Class.forName("it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap");
-            Object changedSlots = mapClass.getConstructor().newInstance();
-
-            try {
-                Constructor<?> ctor = pktClass.getConstructor(
-                        int.class, int.class, int.class, int.class,
-                        clickClass, itemClass,
-                        Class.forName("it.unimi.dsi.fastutil.ints.Int2ObjectMap"));
-                return ctor.newInstance(1, 0, 0, 0, clickType, emptyItem, changedSlots);
-            } catch (NoSuchMethodException ex) {
-                Constructor<?> ctor = pktClass.getConstructor(
-                        int.class, int.class, int.class,
-                        clickClass, itemClass,
-                        Class.forName("it.unimi.dsi.fastutil.ints.Int2ObjectMap"));
-                return ctor.newInstance(1, 0, 0, clickType, emptyItem, changedSlots);
-            }
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    private Object getChannel(Player player) {
-        try {
-            Object handle = player.getClass().getMethod("getHandle").invoke(player);
-            Object connection = getField(handle, "c");
-            if (connection == null)
-                connection = getField(handle, "playerConnection");
-            if (connection == null)
-                return null;
-
-            Object networkManager = getField(connection, "c");
-            if (networkManager == null)
-                networkManager = getField(connection, "networkManager");
-            if (networkManager == null)
-                return null;
-
-            Object channel = getField(networkManager, "m");
-            if (channel == null)
-                channel = getField(networkManager, "channel");
-
-            return isNettyChannel(channel) ? channel : fallbackChannel(player);
-        } catch (Exception ignored) {
-            return fallbackChannel(player);
-        }
-    }
-
-    private Object getField(Object obj, String name) {
-        try {
-            Field f = obj.getClass().getField(name);
-            f.setAccessible(true);
-            return f.get(obj);
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    private Object fallbackChannel(Object current) {
-        try {
-            Object handle = current.getClass().getMethod("getHandle").invoke(current);
-            for (Field f1 : handle.getClass().getFields()) {
-                Object pConn = safeGet(f1, handle);
-                if (pConn == null)
-                    continue;
-                for (Field f2 : pConn.getClass().getFields()) {
-                    Object nMgr = safeGet(f2, pConn);
-                    if (nMgr == null)
-                        continue;
-                    for (Field f3 : nMgr.getClass().getFields()) {
-                        Object ch = safeGet(f3, nMgr);
-                        if (isNettyChannel(ch))
-                            return ch;
-                    }
-                }
-            }
-        } catch (Exception ignored) {
-        }
-        return null;
-    }
-
-    private boolean isNettyChannel(Object obj) {
-        if (obj == null)
-            return false;
-        try {
-            return Class.forName("io.netty.channel.Channel").isInstance(obj);
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    private Object safeGet(Field f, Object obj) {
-        try {
-            f.setAccessible(true);
-            return f.get(obj);
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    private static Class<?> nms(String path) throws ClassNotFoundException {
-        // modern versions
-        try {
-            return Class.forName("net.minecraft." + path);
-        } catch (ClassNotFoundException ignored) {
-        }
-
-        // legacy versions
-        String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
-        return Class.forName("net.minecraft.server." + version + "." + path.substring(path.lastIndexOf('.') + 1));
+    private PacketContainer buildWindowItemsPacket() {
+        PacketContainer pkt = protocol.createPacket(PacketType.Play.Server.WINDOW_ITEMS);
+        return pkt;
     }
 }

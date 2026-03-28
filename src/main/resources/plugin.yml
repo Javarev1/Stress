@@ -2,7 +2,8 @@ name: Stress
 version: '1.0'
 main: me.revqz.stress.Stress
 api-version: '1.21'
-author: revqz 
+author: revqz
+softdepend: [ProtocolLib]
 
 commands:
   stopwatch:

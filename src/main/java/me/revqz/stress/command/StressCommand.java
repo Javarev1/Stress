@@ -36,9 +36,6 @@ public class StressCommand implements CommandExecutor, TabCompleter {
             String name = args[1].toLowerCase();
             for (Test t : Stress.get().getRegistry().names().stream().map(n -> Stress.get().getRegistry().create(n)).toList()) {
                 if (t != null && t.getName().equalsIgnoreCase(name)) { // not reliable for running instance
-                    // wait, Stress.java `tests` list is private.
-                    // Instead of stopping by name this way, we can check active tests, but we don't have an accessor.
-                    // We'll add one or just use `stopAll()` if they want to stop.
                 }
             }
             player.sendMessage(MessageUtils.error("Please use /stress stop (stops all tests) for now."));
@@ -54,7 +51,7 @@ public class StressCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        int timeout = 0;
+        int timeout = 60;
         if (args.length > 1) {
             try {
                 timeout = Integer.parseInt(args[1]);
@@ -66,8 +63,7 @@ public class StressCommand implements CommandExecutor, TabCompleter {
         }
 
         Stress.get().register(test, timeout);
-        String msg = "Started: " + name;
-        if (timeout > 0) msg += " (Timeout: " + timeout + "s)";
+        String msg = "Started: " + name + " (Timeout: " + timeout + "s)";
         player.sendMessage(MessageUtils.success(msg));
         return true;
     }

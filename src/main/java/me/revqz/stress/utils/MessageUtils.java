@@ -5,10 +5,10 @@ import net.kyori.adventure.text.format.TextColor;
 
 public final class MessageUtils {
 
-    public static final TextColor ACCENT = TextColor.color(0x10B981); // Green accent
-    public static final TextColor ERROR = TextColor.color(0xEF4444);  // Red
-    public static final TextColor TEXT = TextColor.color(0xD1D5DB);   // Light Gray
-    public static final TextColor DARK = TextColor.color(0x374151);   // Dark Gray (separator)
+    public static final TextColor ACCENT = TextColor.color(0x10B981);
+    public static final TextColor ERROR = TextColor.color(0xEF4444);
+    public static final TextColor TEXT = TextColor.color(0xD1D5DB);
+    public static final TextColor DARK = TextColor.color(0x374151); 
 
     private MessageUtils() {}
 

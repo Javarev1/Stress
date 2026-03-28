@@ -21,15 +21,23 @@ import me.revqz.stress.test.Test;
 
 public class NBTDataTest implements Test {
 
-    private static final int PAGES = 100;
-    private static final int CHARS_PER_PAGE = 256;
-    private static final int NESTING_DEPTH = 5;
-    private static final int ITEMS_PER_TICK = 3;
-
     private static final Random RNG = new Random();
+
+    private int pages;
+    private int charsPerPage;
+    private int nestingDepth;
+    private int itemsPerTick;
 
     private BukkitTask task;
     private final List<UUID> trackedPlayers = new ArrayList<>();
+
+    @Override
+    public void setup() {
+        pages = Stress.get().getConfig().getInt("tests.nbt-data.pages", 100);
+        charsPerPage = Stress.get().getConfig().getInt("tests.nbt-data.chars-per-page", 256);
+        nestingDepth = Stress.get().getConfig().getInt("tests.nbt-data.nesting-depth", 5);
+        itemsPerTick = Stress.get().getConfig().getInt("tests.nbt-data.items-per-tick", 3);
+    }
 
     @Override
     public void start() {
@@ -38,10 +46,10 @@ public class NBTDataTest implements Test {
                 if (!trackedPlayers.contains(player.getUniqueId()))
                     trackedPlayers.add(player.getUniqueId());
 
-                for (int i = 0; i < ITEMS_PER_TICK; i++) {
+                for (int i = 0; i < itemsPerTick; i++) {
                     ItemStack item = RNG.nextBoolean()
                             ? buildMassiveBook()
-                            : buildNestedShulker(NESTING_DEPTH);
+                            : buildNestedShulker(nestingDepth);
 
                     if (player.getInventory().firstEmpty() != -1)
                         player.getInventory().addItem(item);
@@ -80,9 +88,9 @@ public class NBTDataTest implements Test {
         meta.setTitle("NBT Stress");
         meta.setAuthor("NBT Stress Author");
 
-        for (int i = 0; i < PAGES; i++) {
-            StringBuilder sb = new StringBuilder(CHARS_PER_PAGE);
-            for (int c = 0; c < CHARS_PER_PAGE; c++) {
+        for (int i = 0; i < pages; i++) {
+            StringBuilder sb = new StringBuilder(charsPerPage);
+            for (int c = 0; c < charsPerPage; c++) {
                 sb.append((char) (0x4E00 + RNG.nextInt(0x9FFF - 0x4E00)));
             }
             meta.addPages(Component.text(sb.toString()));
@@ -94,16 +102,14 @@ public class NBTDataTest implements Test {
 
     private ItemStack buildNestedShulker(int depth) {
         if (depth <= 0) {
-            ItemStack base = new ItemStack(Material.DIAMOND, 64);
-            return base;
+            return new ItemStack(Material.DIAMOND, 64);
         }
 
         ItemStack shulker = new ItemStack(Material.SHULKER_BOX);
         BlockStateMeta meta = (BlockStateMeta) shulker.getItemMeta();
         ShulkerBox box = (ShulkerBox) meta.getBlockState();
 
-        ItemStack inner = buildNestedShulker(depth - 1);
-        box.getInventory().setItem(0, inner);
+        box.getInventory().setItem(0, buildNestedShulker(depth - 1));
         box.getInventory().setItem(13, buildMassiveBook());
 
         meta.setBlockState(box);
@@ -125,12 +131,7 @@ public class NBTDataTest implements Test {
     }
 
     private boolean isTrackedItem(ItemStack item) {
-        if (item.getType() == Material.WRITTEN_BOOK)
-            return true;
-
-        if (item.getType() == Material.SHULKER_BOX)
-            return true;
-
-        return false;
+        return item.getType() == Material.WRITTEN_BOOK
+                || item.getType() == Material.SHULKER_BOX;
     }
 }

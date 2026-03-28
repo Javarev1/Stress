@@ -19,7 +19,7 @@ public class StopwatchCommand implements CommandExecutor {
 
         // validation of argument
         if (args.length != 1) {
-            player.sendMessage(MessageUtils.error("Usage: /stopwatch <seconds>"));
+            player.sendMessage(MessageUtils.error("use: /stopwatch <seconds>"));
             return true;
         }
 
@@ -29,11 +29,11 @@ public class StopwatchCommand implements CommandExecutor {
             if (seconds <= 0)
                 throw new NumberFormatException();
         } catch (NumberFormatException e) {
-            player.sendMessage(MessageUtils.error("Positive integer only."));
+            player.sendMessage(MessageUtils.error("positive integer only"));
             return true;
         }
 
-        // Delegate to util
+        // util
         Stopwatch.start(player, seconds, Stress.get()::stopAll);
         player.sendMessage(MessageUtils.success("Stopwatch: " + Stopwatch.format(seconds * 10)));
         return true;

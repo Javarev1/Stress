@@ -23,7 +23,7 @@ public final class Stopwatch {
             @Override
             public void run() {
                 if (tenths[0] <= 0) {
-                    player.sendActionBar(net.kyori.adventure.text.Component.text("Done!", MessageUtils.ACCENT));
+                    player.sendActionBar(net.kyori.adventure.text.Component.text("stopwatch finished", MessageUtils.ACCENT));
                     player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1f, 1f); // 1 decimal plac
                     active = null;
                     cancel();

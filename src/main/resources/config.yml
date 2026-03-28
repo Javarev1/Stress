@@ -1,12 +1,35 @@
-# Stress Config
-
-# Global toggle
 enabled: true
 
-# Test toggles
+defaults:
+  timeout: 60
+
 tests:
-  entity-spam: true
-  chunk-load: true
-  explosion: true
-  redstone: true
-  block-fill: true
+  tps:
+    report-interval: 5
+  ticks:
+    count: 100
+  entity:
+    amount: 100
+    duration: 10
+    range: 0
+    type: zombie
+  chunk-gen:
+    region-x: -1
+    region-z: -1
+  chunk-load:
+    region-x: 0
+    region-z: 0
+  command:
+    rate: 1000
+  nbt-data:
+    pages: 100
+    chars-per-page: 256
+    nesting-depth: 5
+    items-per-tick: 3
+  packet-spam:
+    packets-per-tick: 100
+  argument:
+    rate: 100000
+  player-join:
+    batch-per-tick: 20
+    fake-pool: 200

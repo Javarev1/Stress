@@ -1,80 +1,68 @@
 package me.revqz.stress.tests;
 
-import java.util.Random;
+import java.util.List;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.scheduler.BukkitTask;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 
 import me.revqz.stress.Stress;
 import me.revqz.stress.test.Test;
-import me.revqz.stress.tests.tps.BukkitSchedulerTickProfiler;
-import me.revqz.stress.tests.tps.ServerTickEndEventTickProfiler;
-import me.revqz.stress.tests.tps.TickInterval;
+import me.revqz.stress.utils.MessageUtils;
 
 public class TpsTest implements Test {
 
-    // volume radius of test
-    private static final int RADIUS = 15;
-    private static final Random RNG = new Random();
-
+    private int intervalSeconds;
     private BukkitTask task;
-    private Location center;
-    private BukkitSchedulerTickProfiler schedProf;
-    private ServerTickEndEventTickProfiler eventProf;
+
+    @Override
+    public void setup() {
+        intervalSeconds = Stress.get().getConfig().getInt("tests.tps.report-interval", 5);
+    }
 
     @Override
     public void start() {
-        schedProf = new BukkitSchedulerTickProfiler();
-        eventProf = new ServerTickEndEventTickProfiler();
-        schedProf.start();
-        eventProf.start();
-
-        World world = Bukkit.getWorlds().get(0);
-        center = world.getHighestBlockAt(world.getSpawnLocation()).getLocation().add(0, 10, 0);
-
-        task = Bukkit.getScheduler().runTaskTimer(Stress.get(), () -> {
-            TickInterval interval = new TickInterval();
-            Material mat = RNG.nextBoolean() ? Material.REDSTONE_BLOCK : Material.AIR;
-
-            // Massive synchronous block updates
-            for (int x = -RADIUS; x <= RADIUS; x++) {
-                for (int y = -RADIUS; y <= RADIUS; y++) {
-                    for (int z = -RADIUS; z <= RADIUS; z++) {
-                        center.clone().add(x, y, z).getBlock().setType(mat, true);
-                    }
-                }
-            }
-            interval.end();
-
-            Bukkit.broadcast(Component.text(String.format(
-                    "[TpsTest] Block Update Time: %.2fms | Sched Delay: %.2fms | Paper Event: %.2fms",
-                    interval.durationMs(), schedProf.getMspt(), eventProf.getMspt()), NamedTextColor.RED));
-        }, 0L, 10L);
+        task = Bukkit.getScheduler().runTaskTimer(Stress.get(), this::printReport, 20L, intervalSeconds * 20L);
     }
 
     @Override
     public void stop() {
         if (task != null)
             task.cancel();
-        if (schedProf != null)
-            schedProf.stop();
-        if (eventProf != null)
-            eventProf.stop();
-        // Cleanup volume
-        if (center != null) {
-            for (int x = -RADIUS; x <= RADIUS; x++) {
-                for (int y = -RADIUS; y <= RADIUS; y++) {
-                    for (int z = -RADIUS; z <= RADIUS; z++) {
-                        center.clone().add(x, y, z).getBlock().setType(Material.AIR, false);
-                    }
-                }
-            }
-        }
+        printReport();
+    }
+
+    private void printReport() {
+        double mspt1 = Stress.get().getTickProfiler().getAverageMspt(20);
+        double mspt5 = Stress.get().getTickProfiler().getAverageMspt(100);
+        double mspt15 = Stress.get().getTickProfiler().getAverageMspt(300);
+        double tps1 = Stress.get().getTickProfiler().msptToTps(mspt1);
+        double tps5 = Stress.get().getTickProfiler().msptToTps(mspt5);
+        double tps15 = Stress.get().getTickProfiler().msptToTps(mspt15);
+
+        Component msg = MessageUtils.prefix()
+                .append(Component.text("TPS ", MessageUtils.TEXT))
+                .append(tpsComponent(tps1)).append(Component.text(", ", MessageUtils.TEXT))
+                .append(tpsComponent(tps5)).append(Component.text(", ", MessageUtils.TEXT))
+                .append(tpsComponent(tps15))
+                .append(Component.text("  MSPT ", MessageUtils.TEXT))
+                .append(msptComponent(mspt1)).append(Component.text(", ", MessageUtils.TEXT))
+                .append(msptComponent(mspt5)).append(Component.text(", ", MessageUtils.TEXT))
+                .append(msptComponent(mspt15));
+
+        Bukkit.broadcast(msg);
+    }
+
+    private Component tpsComponent(double tps) {
+        TextColor color = tps >= 19.5 ? NamedTextColor.GREEN : tps >= 16 ? NamedTextColor.YELLOW : NamedTextColor.RED;
+        return Component.text(String.format("%.1f", tps), color);
+    }
+
+    private Component msptComponent(double mspt) {
+        TextColor color = mspt <= 50 ? NamedTextColor.GREEN : mspt <= 100 ? NamedTextColor.YELLOW : NamedTextColor.RED;
+        return Component.text(String.format("%.1fms", mspt), color);
     }
 
     @Override

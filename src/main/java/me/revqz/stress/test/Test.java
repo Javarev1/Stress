@@ -1,6 +1,5 @@
 package me.revqz.stress.test;
 
-// test contract
 public interface Test {
     default void setup() {}
 

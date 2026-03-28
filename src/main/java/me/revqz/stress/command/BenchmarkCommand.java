@@ -48,7 +48,7 @@ public class BenchmarkCommand implements CommandExecutor {
             if (seconds <= 0)
                 throw new NumberFormatException();
         } catch (NumberFormatException e) {
-            player.sendMessage(me.revqz.stress.utils.MessageUtils.error("pos int only."));
+            player.sendMessage(me.revqz.stress.utils.MessageUtils.error("positive integer only"));
             return true;
         }
 
@@ -82,7 +82,7 @@ public class BenchmarkCommand implements CommandExecutor {
                 "Benchmark started for " + Stopwatch.format(seconds * 10)));
         return true;
     }
-
+    // test results priniting format
     private void printReport(Player p, int seconds, Deque<Tick> ticks, List<Integer> pings) {
         long now = System.currentTimeMillis();
 

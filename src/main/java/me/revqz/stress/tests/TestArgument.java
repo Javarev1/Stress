@@ -9,16 +9,18 @@ import me.revqz.stress.test.Test;
 
 public class TestArgument implements Test {
 
-    // parses per tick
-    private static final int RATE = 100_000;
-
+    private int rate;
     private BukkitTask task;
+
+    @Override
+    public void setup() {
+        rate = Stress.get().getConfig().getInt("tests.argument.rate", 100_000);
+    }
 
     @Override
     public void start() {
         task = Bukkit.getScheduler().runTaskTimer(Stress.get(), () -> {
-            for (int i = 0; i < RATE; i++) {
-                // base string parsing
+            for (int i = 0; i < rate; i++) {
                 Integer.parseInt("12345");
                 Boolean.parseBoolean("true");
                 UUID.fromString("00000000-0000-0000-0000-000000000000");
