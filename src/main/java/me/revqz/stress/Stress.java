@@ -6,6 +6,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import me.revqz.stress.command.BenchmarkCommand;
 import me.revqz.stress.command.StopwatchCommand;
 import me.revqz.stress.command.StressCommand;
+import me.revqz.stress.data.MongoManager;
 import me.revqz.stress.test.Test;
 import me.revqz.stress.test.TestRegistry;
 import me.revqz.stress.tests.ChunkGenTest;
@@ -31,12 +32,14 @@ public final class Stress extends JavaPlugin {
     private final List<Test> tests = new ArrayList<>();
     private final TestRegistry registry = new TestRegistry();
     private final TickProfiler tickProfiler = new TickProfiler();
+    private final MongoManager mongoManager = new MongoManager();
 
     @Override
     public void onEnable() {
         instance = this;
         saveDefaultConfig();
         tickProfiler.start();
+        mongoManager.connect();
 
         registry.register("chunk-gen", ChunkGenTest::new);
         registry.register("chunk-load", ChunkLoadTest::new);
@@ -62,6 +65,7 @@ public final class Stress extends JavaPlugin {
     public void onDisable() {
         stopAll();
         tickProfiler.stop();
+        mongoManager.disconnect();
         getLogger().info("Stress disabled.");
     }
 
@@ -110,5 +114,9 @@ public final class Stress extends JavaPlugin {
 
     public TickProfiler getTickProfiler() {
         return tickProfiler;
+    }
+
+    public MongoManager getMongoManager() {
+        return mongoManager;
     }
 }

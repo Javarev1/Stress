@@ -3,6 +3,7 @@ version: '1.0'
 main: me.revqz.stress.Stress
 api-version: '1.21'
 author: revqz
+website: revqz.me
 softdepend: [ProtocolLib]
 
 commands:

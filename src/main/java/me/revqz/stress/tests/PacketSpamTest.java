@@ -42,7 +42,7 @@ public class PacketSpamTest implements Test {
         totalSent.set(0);
 
         if (protocol == null) {
-            Stress.get().getLogger().warning("[PacketSpam] ProtocolLib not found — test skipped.");
+            Stress.get().getLogger().warning("error: protocollib not found");
             return;
         }
 
@@ -88,7 +88,7 @@ public class PacketSpamTest implements Test {
             task.cancel();
         long elapsed = Math.max(1, (System.currentTimeMillis() - startMs) / 1000);
         Stress.get().getLogger().info(
-                "[PacketSpam] finished — total=" + totalSent.get()
+                "test finished — total=" + totalSent.get()
                         + "  avg=" + (totalSent.get() / elapsed) + " pkt/s");
     }
 
